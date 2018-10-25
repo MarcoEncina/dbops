@@ -122,6 +122,15 @@ class DBOps {
             $this.AddFile($file, $CollectionName)
         }
     }
+
+    hidden [string] ConvertOSPath ([string]$path) {
+        $newPath = switch (([Path]::DirectorySeparatorChar)) {
+            '\' { $path.Replace('/', $_) }
+            '/' { $path.Replace('\', $_) }
+            default { $path }
+        }
+        return $newPath
+    }
 }
 
 ############################
@@ -469,12 +478,7 @@ class DBOpsPackageBase : DBOps {
         $jsonObject = ConvertFrom-Json $jsonString -ErrorAction Stop
         foreach ($build in $jsonObject.Builds) {
             foreach ($script in $build.Scripts) {
-                $slash = [IO.Path]::DirectorySeparatorChar
-                $script.PackagePath = switch ($slash) {
-                    '\' { $script.PackagePath.Replace('/', $_) }
-                    '/' { $script.PackagePath.Replace('\', $_) }
-                    default { $script.PackagePath }
-                }
+                $script.PackagePath = $this.ConvertOSPath($script.PackagePath)
             }
         }
         return $jsonObject
@@ -525,7 +529,7 @@ class DBOpsPackage : DBOpsPackageBase {
                     $newBuild = $this.NewBuild($build.build)
                     foreach ($script in $build.Scripts) {
                         $filePackagePath = Join-Path $newBuild.GetPackagePath() $script.packagePath
-                        $scriptFile = $zip.Entries | Where-Object FullName -eq $filePackagePath
+                        $scriptFile = $zip.Entries | Where-Object { $this.ConvertOSPath($_.FullName) -eq $filePackagePath }
                         if (!$scriptFile) {
                             $this.ThrowArgumentException($this, "File not found inside the package: $filePackagePath")
                         }
@@ -537,7 +541,7 @@ class DBOpsPackage : DBOpsPackageBase {
                 foreach ($file in @('DeployFile', 'PreDeployFile', 'PostDeployFile', 'ConfigurationFile')) {
                     $jsonFileObject = $jsonObject.$file
                     if ($jsonFileObject) {
-                        $fileBinary = $zip.Entries | Where-Object FullName -eq $jsonFileObject.packagePath
+                        $fileBinary = $zip.Entries | Where-Object { $this.ConvertOSPath($_.FullName) -eq $jsonFileObject.packagePath }
                         if ($fileBinary) {
                             $newFile = [DBOpsRootFile]::new($jsonFileObject, $fileBinary)
                             $this.AddFile($newFile, $file)

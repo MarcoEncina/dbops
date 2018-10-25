@@ -20,6 +20,7 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 . "$here\..\internal\classes\DBOpsHelper.class.ps1"
 . "$here\..\internal\classes\DBOps.class.ps1"
 
+$slash = [IO.Path]::DirectorySeparatorChar
 $packageName = "$here\etc\$commandName.zip"
 $script1 = "$here\etc\install-tests\success\1.sql"
 $script2 = "$here\etc\install-tests\success\2.sql"
@@ -200,6 +201,20 @@ Describe "DBOpsPackage class tests" -Tag $commandName, UnitTests, DBOpsPackage {
         It "Should test RefreshModuleVersion method" {
             $pkg.RefreshModuleVersion()
             $pkg.ModuleVersion | Should Be (Get-Module dbops).Version
+        }
+        It "Should test ReadMetadata method" {
+            $b = $pkg.NewBuild('1.0')
+            $s = "$here\etc\install-tests\success\1.sql"
+            $f = [DBOpsScriptFile]::new(@{SourcePath = $s; PackagePath = 'success\1.sql'})
+            $f.SetContent([DBOpsHelper]::GetBinaryFile($s))
+            $b.AddFile($f, 'Scripts')
+            $s = "$here\etc\install-tests\success\2.sql"
+            $f = [DBOpsScriptFile]::new(@{SourcePath = $s; PackagePath = 'success/2.sql'})
+            $f.SetContent([DBOpsHelper]::GetBinaryFile($s))
+            $b.AddFile($f, 'Scripts')
+            $j = $pkg.ExportToJson()
+            $md = $pkg.ReadMetadata($j)
+            $md.Builds.Scripts.PackagePath | Should -Be @("success$($slash)1.sql","success$($slash)2.sql")
         }
         It "Should test RefreshFileProperties method" {
             $pkg.RefreshFileProperties()
