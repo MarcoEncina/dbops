@@ -1058,7 +1058,7 @@ class DBOpsScriptFile : DBOpsFile {
         while ($lastParent.Parent) {
             $lastParent = $lastParent.Parent
         }
-        $dPath = $dPath -replace '^' + [regex]::Escape($lastParent.GetPackagePath() + ([IO.Path]::DirectorySeparatorChar)), ''
+        $dPath = $dPath -replace ('^' + [regex]::Escape($lastParent.GetPackagePath() + ([IO.Path]::DirectorySeparatorChar))), ''
         return $dPath.Replace('/','\')
     }
 }

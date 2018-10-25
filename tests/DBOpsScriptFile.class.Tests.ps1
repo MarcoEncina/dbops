@@ -208,5 +208,11 @@ Describe "dbopsScriptFile class tests" -Tag $commandName, UnitTests, DBOpsFile {
             $p = [DBOpsPackage]::new($packageName)
             $p.Builds[0].Scripts[0].GetContent() | Should BeLike 'CREATE TABLE c (a int)*'
         }
+        It "should test GetPackagePath method" {
+            $file.GetPackagePath() | Should Be 'content\1.0\success\1.sql'
+        }
+        It "should test GetDeploymentPath method" {
+            $file.GetDeploymentPath() | Should Be '1.0\success\1.sql'
+        }
     }
 }

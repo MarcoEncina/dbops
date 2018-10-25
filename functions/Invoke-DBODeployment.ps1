@@ -212,7 +212,7 @@
             }
             foreach ($buildItem in $buildCollection) {
                 foreach ($script in $buildItem.scripts) {
-                    # Replace tokens in the scripts 
+                    # Replace tokens in the scripts
                     $scriptContent = Resolve-VariableToken $script.GetContent() $runtimeVariables
                     $scriptCollection += [DbUp.Engine.SqlScript]::new($script.GetDeploymentPath(), $scriptContent)
                 }
