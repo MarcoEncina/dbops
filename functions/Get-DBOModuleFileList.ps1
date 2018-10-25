@@ -20,13 +20,13 @@ Get-DBOModuleFileList
         $obj.Path = $Path
         $obj.Directory = Split-Path $Path -Parent
         $obj.Type = $Type
-        $file = Get-Item -Path (Join-Path "$PSScriptRoot\.." $Path)
+        $file = Get-Item -Path (Join-Path (Get-Item $PSScriptRoot).Parent.FullName $Path)
         $obj.FullName = $file.FullName
         $obj.Name = $file.Name
         $obj
     }
-
-    $moduleCatalog = Get-Content (Join-Path "$PSScriptRoot\.." "internal\json\dbops.json") -Raw | ConvertFrom-Json
+    $slash = [IO.Path]::DirectorySeparatorChar
+    $moduleCatalog = Get-Content (Join-Path (Get-Item $PSScriptRoot).Parent.FullName "internal\json\dbops.json".Replace('\', $slash)) -Raw | ConvertFrom-Json
     foreach ($property in $moduleCatalog.psobject.properties.Name) {
         foreach ($file in $moduleCatalog.$property) {
             ModuleFile $file $property

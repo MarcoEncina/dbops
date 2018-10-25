@@ -423,8 +423,9 @@ class DBOpsPackageBase : DBOps {
     }
 
     hidden [void] SaveModuleToFile([ZipArchive]$zipArchive) {
+        $slash = [IO.Path]::DirectorySeparatorChar
         foreach ($file in (Get-DBOModuleFileList)) {
-            [DBOpsHelper]::WriteZipFile($zipArchive, (Join-Path "Modules\dbops" $file.Path), [DBOpsHelper]::GetBinaryFile($file.FullName))
+            [DBOpsHelper]::WriteZipFile($zipArchive, (Join-Path "Modules\dbops".Replace('\',$slash) $file.Path), [DBOpsHelper]::GetBinaryFile($file.FullName))
         }
     }
     #Returns content folder for scripts
@@ -435,7 +436,8 @@ class DBOpsPackageBase : DBOps {
     #Refresh module version from the module file inside the package
     [void] RefreshModuleVersion() {
         if ($this.FileName) {
-            $manifestPackagePath = 'Modules\dbops\dbops.psd1'
+            $slash = [IO.Path]::DirectorySeparatorChar
+            $manifestPackagePath = 'Modules\dbops\dbops.psd1'.Replace('\', $slash)
             $contents = ([DBOpsHelper]::GetArchiveItem($this.FileName, $manifestPackagePath)).ByteArray
             $scriptBlock = [scriptblock]::Create([DBOpsHelper]::DecodeBinaryText($contents))
             $moduleFile = Invoke-Command -ScriptBlock $scriptBlock
@@ -623,7 +625,8 @@ class DBOpsPackageFile : DBOpsPackageBase {
     #Overload to read module file from the folder
     [void] RefreshModuleVersion() {
         if ($this.FileName) {
-            $manifestPackagePath = Join-Path $this.FileName 'Modules\dbops\dbops.psd1'
+            $slash = [IO.Path]::DirectorySeparatorChar
+            $manifestPackagePath = Join-Path $this.FileName 'Modules\dbops\dbops.psd1'.Replace('\',$slash)
             $contents = ([DBOpsHelper]::GetBinaryFile($manifestPackagePath))
             $scriptBlock = [scriptblock]::Create([DBOpsHelper]::DecodeBinaryText($contents))
             $moduleFile = Invoke-Command -ScriptBlock $scriptBlock
@@ -774,7 +777,7 @@ class DBOpsBuild : DBOps {
     }
     #Get absolute path inside the package
     [string] GetPackagePath() {
-        return Join-Path $this.Parent.GetPackagePath() $this.PackagePath
+        return (Join-Path $this.Parent.GetPackagePath() $this.PackagePath).Replace('/','\')
     }
     #Exports object to Json in the format in which it will be stored in the package file
     [string] ExportToJson() {
@@ -921,7 +924,7 @@ class DBOpsFile : DBOps {
         return [DBOpsHelper]::DecodeBinaryText($this.ByteArray)
     }
     [string] GetPackagePath() {
-        return Join-Path $this.Parent.GetPackagePath() $this.PackagePath
+        return (Join-Path $this.Parent.GetPackagePath() $this.PackagePath).Replace('/','\')
     }
     [string] ExportToJson() {
         $fields = @(

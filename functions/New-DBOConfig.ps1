@@ -26,7 +26,7 @@
 
     .EXAMPLE
     # Saves empty configuration to a file
-    (New-DBOConfig).SaveToFile('c:\package\dbops.config.json')
+    New-DBOConfig | Export-DBOConfig c:\package\dbops.config.json
 
     #>
     [CmdletBinding()]
