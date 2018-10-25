@@ -435,9 +435,8 @@ class DBOpsPackageBase : DBOps {
     }
 
     hidden [void] SaveModuleToFile([ZipArchive]$zipArchive) {
-        $slash = [IO.Path]::DirectorySeparatorChar
         foreach ($file in (Get-DBOModuleFileList)) {
-            [DBOpsHelper]::WriteZipFile($zipArchive, (Join-Path "Modules\dbops".Replace('\',$slash) $file.Path), [DBOpsHelper]::GetBinaryFile($file.FullName))
+            [DBOpsHelper]::WriteZipFile($zipArchive, $this.ConvertOSPath((Join-Path "Modules\dbops" $file.Path)), [DBOpsHelper]::GetBinaryFile($file.FullName))
         }
     }
     #Returns content folder for scripts
@@ -448,8 +447,7 @@ class DBOpsPackageBase : DBOps {
     #Refresh module version from the module file inside the package
     [void] RefreshModuleVersion() {
         if ($this.FileName) {
-            $slash = [IO.Path]::DirectorySeparatorChar
-            $manifestPackagePath = 'Modules\dbops\dbops.psd1'.Replace('\', $slash)
+            $manifestPackagePath = $this.ConvertOSPath('Modules\dbops\dbops.psd1')
             $contents = ([DBOpsHelper]::GetArchiveItem($this.FileName, $manifestPackagePath)).ByteArray
             $scriptBlock = [scriptblock]::Create([DBOpsHelper]::DecodeBinaryText($contents))
             $moduleFile = Invoke-Command -ScriptBlock $scriptBlock
@@ -647,8 +645,7 @@ class DBOpsPackageFile : DBOpsPackageBase {
     #Overload to read module file from the folder
     [void] RefreshModuleVersion() {
         if ($this.FileName) {
-            $slash = [IO.Path]::DirectorySeparatorChar
-            $manifestPackagePath = Join-Path $this.FileName 'Modules\dbops\dbops.psd1'.Replace('\',$slash)
+            $manifestPackagePath = $this.ConvertOSPath((Join-Path $this.FileName 'Modules\dbops\dbops.psd1'))
             $contents = ([DBOpsHelper]::GetBinaryFile($manifestPackagePath))
             $scriptBlock = [scriptblock]::Create([DBOpsHelper]::DecodeBinaryText($contents))
             $moduleFile = Invoke-Command -ScriptBlock $scriptBlock
