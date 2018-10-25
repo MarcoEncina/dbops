@@ -342,11 +342,11 @@ class DBOpsPackageBase : DBOps {
     [string] ExportToJson() {
         $exportObject = @{} | Select-Object -Property $this.PropertiesToExport
         foreach ($type in $exportObject.psobject.Properties.name) {
-                
+            $property = $this.PsObject.Properties | Where-Object Name -eq $type
             if ($this.$type -is [DBOps]) {
                 $exportObject.$type = $this.$type.ExportToJson() | ConvertFrom-Json
             }
-            elseif (($this.PsObject.Properties | Where-Object Name -eq $type).TypeNameOfValue -like '*`[`]') {
+            elseif ($property.TypeNameOfValue -like '*`[`]' -or $property.TypeNameOfValue -like 'System.Collections.Generic.List*') {
                 $collection = @()
                 foreach ($collectionItem in $this.$type) {
                     if ($collectionItem -is [DBOps]) {
