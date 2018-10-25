@@ -6,6 +6,8 @@ using namespace System.IO.Compression
 ######################
 
 class DBOps {
+    hidden [array]$PropertiesToExport = @('*')
+
     hidden [void] ThrowException ([string]$Message, [object]$Target, [string]$Category) {
         $callStack = (Get-PSCallStack)[1]
         $splatParam = @{
@@ -165,6 +167,7 @@ class DBOpsPackageBase : DBOps {
     #hidden properties
     hidden [string]$FileName
     hidden [string]$PackagePath
+    hidden [array]$PropertiesToExport = @('ScriptDirectory', 'DeployFile', 'PreDeployFile', 'PostDeployFile', 'ConfigurationFile', 'Builds')
 
     DBOpsPackageBase () {
         $this.Builds = [System.Collections.Generic.List[DBOpsBuild]]::new()
@@ -328,7 +331,7 @@ class DBOpsPackageBase : DBOps {
     # 	return $false
     # }
     [string] ExportToJson() {
-        $exportObject = @{} | Select-Object 'ScriptDirectory', 'DeployFile', 'PreDeployFile', 'PostDeployFile', 'ConfigurationFile', 'Builds'
+        $exportObject = @{} | Select-Object -Property $this.PropertiesToExport
         foreach ($type in $exportObject.psobject.Properties.name) {
                 
             if ($this.$type -is [DBOps]) {
@@ -461,6 +464,21 @@ class DBOpsPackageBase : DBOps {
         $config.Parent = $this
     }
 
+    #Read json and adjust paths appropriately to the environment (Win/Linux)
+    [object] ReadMetadata([string]$jsonString) {
+        $jsonObject = ConvertFrom-Json $jsonString -ErrorAction Stop
+        foreach ($build in $jsonObject.Builds) {
+            foreach ($script in $build.Scripts) {
+                $slash = [IO.Path]::DirectorySeparatorChar
+                $script.PackagePath = switch ($slash) {
+                    '\' { $script.PackagePath.Replace('/', $_) }
+                    '/' { $script.PackagePath.Replace('\', $_) }
+                    default { $script.PackagePath }
+                }
+            }
+        }
+        return $jsonObject
+    }
 }
 ########################
 # DBOpsPackage class #
@@ -500,7 +518,7 @@ class DBOpsPackage : DBOpsPackageBase {
             $pkgFile = $zip.Entries | Where-Object FullName -eq ([DBOpsConfig]::GetPackageFileName())
             if ($pkgFile) {
                 $pkgFileBin = [DBOpsHelper]::ReadDeflateStream($pkgFile.Open()).ToArray()
-                $jsonObject = ConvertFrom-Json ([DBOpsHelper]::DecodeBinaryText($pkgFileBin)) -ErrorAction Stop
+                $jsonObject = $this.ReadMetadata([DBOpsHelper]::DecodeBinaryText($pkgFileBin))
                 $this.Init($jsonObject)
                 # Processing builds
                 foreach ($build in $jsonObject.builds) {
@@ -567,7 +585,7 @@ class DBOpsPackageFile : DBOpsPackageBase {
         # Processing package file
         $pkgFileBin = [DBOpsHelper]::GetBinaryFile($fileName)
         if ($pkgFileBin) {
-            $jsonObject = ConvertFrom-Json ([DBOpsHelper]::DecodeBinaryText($pkgFileBin)) -ErrorAction Stop
+            $jsonObject = $this.ReadMetadata([DBOpsHelper]::DecodeBinaryText($pkgFileBin))
             $this.Init($jsonObject)
             #Defining package path as a parent folder of the package file
             $folderPath = Split-Path $fileName -Parent
@@ -648,6 +666,7 @@ class DBOpsBuild : DBOps {
 
     hidden [DBOpsPackageBase]$Parent
     hidden [string]$PackagePath
+    hidden [array]$PropertiesToExport = @('Build', 'CreatedDate', 'PackagePath')
 
     #Constructors
     DBOpsBuild ([string]$build) {
@@ -785,12 +804,7 @@ class DBOpsBuild : DBOps {
         foreach ($script in $this.Scripts) {
             $scriptCollection += $script.ExportToJson() | ConvertFrom-Json
         }
-        $fields = @(
-            'Build'
-            'CreatedDate'
-            'PackagePath'
-        )
-        $output = $this | Select-Object -Property $fields
+        $output = $this | Select-Object -Property $this.PropertiesToExport
         $output | Add-Member -MemberType NoteProperty -Name Scripts -Value $scriptCollection
         return $output | ConvertTo-Json -Depth 2
     }
@@ -852,6 +866,7 @@ class DBOpsFile : DBOps {
     #Hidden properties
     hidden [string]$Hash
     hidden [DBOps]$Parent
+    hidden [array]$PropertiesToExport = @('SourcePath', 'Hash', 'PackagePath')
 
     #Constructors
     DBOpsFile () {}
@@ -927,12 +942,7 @@ class DBOpsFile : DBOps {
         return Join-Path $this.Parent.GetPackagePath() $this.PackagePath
     }
     [string] ExportToJson() {
-        $fields = @(
-            'SourcePath'
-            'Hash'
-            'PackagePath'
-        )
-        return $this | Select-Object -Property $fields | ConvertTo-Json -Depth 1
+        return $this | Select-Object -Property $this.PropertiesToExport | ConvertTo-Json -Depth 1
     }
     #Writes current script into the archive file
     [void] Save([ZipArchive]$zipFile) {

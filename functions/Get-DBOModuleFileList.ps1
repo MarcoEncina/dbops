@@ -16,8 +16,9 @@ Get-DBOModuleFileList
             $Path,
             $Type
         )
+        $slash = [IO.Path]::DirectorySeparatorChar
         $obj = @{} | Select-Object Path, Name, FullName, Type, Directory
-        $obj.Path = $Path
+        $obj.Path = $Path.Replace('\', $slash)
         $obj.Directory = Split-Path $Path -Parent
         $obj.Type = $Type
         $file = Get-Item -Path (Join-Path (Get-Item $PSScriptRoot).Parent.FullName $Path)
