@@ -212,10 +212,9 @@
             }
             foreach ($buildItem in $buildCollection) {
                 foreach ($script in $buildItem.scripts) {
-                    # Replace tokens in the scripts
-                    $scriptPackagePath = ($script.GetPackagePath() -replace ('^' + [regex]::Escape($package.GetPackagePath())), '').TrimStart('\')
+                    # Replace tokens in the scripts 
                     $scriptContent = Resolve-VariableToken $script.GetContent() $runtimeVariables
-                    $scriptCollection += [DbUp.Engine.SqlScript]::new($scriptPackagePath, $scriptContent)
+                    $scriptCollection += [DbUp.Engine.SqlScript]::new($script.GetDeploymentPath(), $scriptContent)
                 }
             }
         }

@@ -777,7 +777,7 @@ class DBOpsBuild : DBOps {
     }
     #Get absolute path inside the package
     [string] GetPackagePath() {
-        return (Join-Path $this.Parent.GetPackagePath() $this.PackagePath).Replace('/','\')
+        return Join-Path $this.Parent.GetPackagePath() $this.PackagePath
     }
     #Exports object to Json in the format in which it will be stored in the package file
     [string] ExportToJson() {
@@ -924,7 +924,7 @@ class DBOpsFile : DBOps {
         return [DBOpsHelper]::DecodeBinaryText($this.ByteArray)
     }
     [string] GetPackagePath() {
-        return (Join-Path $this.Parent.GetPackagePath() $this.PackagePath).Replace('/','\')
+        return Join-Path $this.Parent.GetPackagePath() $this.PackagePath
     }
     [string] ExportToJson() {
         $fields = @(
@@ -1050,6 +1050,16 @@ class DBOpsScriptFile : DBOpsFile {
         if ($this.Hash -ne $Hash) {
             $this.ThrowArgumentException($this, "File cannot be loaded, hash mismatch: $($this.Name)")
         }
+    }
+    [string] GetDeploymentPath () {
+        $dPath = $this.GetPackagePath()
+        #Recursively check parents and remove the top-level folder
+        $lastParent = $this
+        while ($lastParent.Parent) {
+            $lastParent = $lastParent.Parent
+        }
+        $dPath = $dPath -replace '^' + [regex]::Escape($lastParent.GetPackagePath() + ([IO.Path]::DirectorySeparatorChar)), ''
+        return $dPath.Replace('/','\')
     }
 }
 
