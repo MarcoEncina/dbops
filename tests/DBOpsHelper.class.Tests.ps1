@@ -243,12 +243,13 @@ Describe "dbopsHelper class tests" -Tag $commandName, UnitTests, dbopsHelper {
                 $encodedFile | Should -FileContentMatchExactly ([regex]::Escape($h::DecodeBinaryText($h::GetBinaryFile($encodedFile))))
             }
         }
-
+        It "Should return empty string when byte array is empty" {
+            $h::DecodeBinaryText([byte[]]::new(0)) | Should -BeNullOrEmpty
+            { $h::DecodeBinaryText([byte[]]::new(0)) } | Should Not Throw
+        }
         It "should validate negative tests" {
-            $h = [DBOpsHelper]
             { $h::DecodeBinaryText('0xAAAA') } | Should Throw
             { $h::DecodeBinaryText('NotAByte') } | Should Throw
-            { $h::DecodeBinaryText($enc::UTF8.GetBytes($null)) } | Should Throw
         }
     }
 }
