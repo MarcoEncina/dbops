@@ -1,5 +1,4 @@
 Function ConvertFrom-EncryptedString {
-    [CmdletBinding(SupportsShouldProcess)]
     <#
     .SYNOPSIS
     Converts an encrypted string to a SecureString object.
@@ -30,6 +29,7 @@ Function ConvertFrom-EncryptedString {
     .NOTES
     
     #>
+    [CmdletBinding(SupportsShouldProcess)]
     Param (
         [Parameter(ValueFromPipeline, Mandatory)]
         [String]$String

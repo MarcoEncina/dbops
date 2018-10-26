@@ -1,5 +1,4 @@
 Function ConvertTo-EncryptedString {
-    [CmdletBinding(SupportsShouldProcess)]
     <#
     .SYNOPSIS
     Converts a SecureString object to an encrypted string.
@@ -13,7 +12,7 @@ Function ConvertTo-EncryptedString {
     Custom key is enforced in a Unix environment by a default setting security.usecustomencryptionkey
     PS> Get/Set-DBODefaultSetting -Name security.usecustomencryptionkey
    
-    .PARAMETER String
+    .PARAMETER SecureString
     SecureString to be encrypted
     
     .PARAMETER Confirm
@@ -29,6 +28,7 @@ Function ConvertTo-EncryptedString {
     .NOTES
     
     #>
+    [CmdletBinding(SupportsShouldProcess)]
     Param (
         [Parameter(ValueFromPipeline, Mandatory)]
         [secureString]$SecureString
