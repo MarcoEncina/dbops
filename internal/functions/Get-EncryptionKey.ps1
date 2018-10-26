@@ -5,7 +5,7 @@ function Get-EncryptionKey {
         return $null
     }
     else {
-        $file = Get-Item -Path $path
+        $file = Get-Item -Path $path -Force -ErrorAction Stop
         return [System.IO.File]::ReadAllBytes($file.FullName)
     }
 }
