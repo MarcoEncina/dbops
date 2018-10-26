@@ -6,11 +6,16 @@ Returns all module files based on json file in the module root
 .DESCRIPTION
 Returns objects from internal\json\dbops.json. Is used internally to load files into the package.
 
+.PARAMETER Type
+Type of the module files to display
+
 .EXAMPLE
 # Returns module files
 Get-DBOModuleFileList
 #>
-    Param ()
+    Param (
+        [string[]]$Type
+    )
     Function ModuleFile {
         Param (
             $Path,
@@ -29,8 +34,10 @@ Get-DBOModuleFileList
     $slash = [IO.Path]::DirectorySeparatorChar
     $moduleCatalog = Get-Content (Join-Path (Get-Item $PSScriptRoot).Parent.FullName "internal\json\dbops.json".Replace('\', $slash)) -Raw | ConvertFrom-Json
     foreach ($property in $moduleCatalog.psobject.properties.Name) {
-        foreach ($file in $moduleCatalog.$property) {
-            ModuleFile $file $property
+        if (!$Type -or $property -in $Type) {
+            foreach ($file in $moduleCatalog.$property) {
+                ModuleFile $file $property
+            }
         }
     }
 }

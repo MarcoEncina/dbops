@@ -44,6 +44,8 @@
         "internal\\functions\\Get-ExternalLibrary.ps1",
         "internal\\functions\\Get-EncryptionKey.ps1",
         "internal\\functions\\New-EncryptionKey.ps1",
+        "internal\\functions\\Join-PathList.ps1",
+        "internal\\functions\\Convert-DirectorySeparator.ps1",
         "internal\\classes\\DBOpsHelper.class.ps1",
         "internal\\classes\\DBOps.class.ps1",
         "internal\\classes\\DBOpsDeploymentStatus.class.ps1",

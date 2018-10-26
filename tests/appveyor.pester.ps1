@@ -46,6 +46,9 @@ Set-Location $ModuleBase
 Remove-Module dbops -ErrorAction Ignore
 #imports the module making sure DLL is loaded ok
 Import-Module "$ModuleBase\dbops.psd1"
+#import module internal functions
+Get-DBOModuleFileList -Type internal | ForEach-Object { . $_.FullName }
+
 
 
 function Get-CoverageIndications($Path, $ModuleBase) {
@@ -203,8 +206,8 @@ if (-not $Finalize) {
     foreach ($f in $AllTestsWithinScenario) {
         $Counter += 1
         $PesterSplat = @{
-            'Script'   =  @{
-                Path = $f.FullName
+            'Script'   = @{
+                Path       = $f.FullName
                 Parameters = @{
                     Batch = $true
                 }

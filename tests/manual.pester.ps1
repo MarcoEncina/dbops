@@ -7,6 +7,7 @@
 
 #Explicitly import the module for testing
 Import-Module "$PSScriptRoot\..\dbops.psd1" -Force
+Get-DBOModuleFileList -Type internal | ForEach-Object { . $_.FullName }
 #Import ZipHelper
 Import-Module ziphelper -Force
 
