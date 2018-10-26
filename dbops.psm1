@@ -116,6 +116,8 @@ Set-PSFConfig -FullName dbops.mail.SmtpServer -Value "" -Initialize -Description
 Set-PSFConfig -FullName dbops.mail.From -Value "" -Initialize -Description "'From' field in the outgoing emails."
 Set-PSFConfig -FullName dbops.mail.To -Value "" -Initialize -Description "'To' field in the outgoing emails."
 Set-PSFConfig -FullName dbops.mail.Subject -Value "DBOps deployment status" -Initialize -Description "'Subject' field in the outgoing emails."
+Set-PSFConfig -FullName dbops.security.encryptionkey -Value "~/.dbops.key" -Initialize -Description "Path to a custom encryption key used to encrypt/decrypt passwords. The key should be a binary file with a length of 128, 192 or 256 bits. Key will be generated automatically if not exists."
+Set-PSFConfig -FullName dbops.security.usecustomencryptionkey -Value ($PSVersionTable.Platform -eq 'Unix') -Validation bool -Initialize -Description "Determines whether to use a custom encryption key for storing passwords. Enabled by default only on Unix platforms."
 
 # defining aliases
 

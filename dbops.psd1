@@ -86,7 +86,9 @@
         'Send-DBOMailMessage',
         'Reset-DBODefaultSetting',
         'New-DBOConfig',
-        'Export-DBOConfig'
+        'Export-DBOConfig',
+        'ConvertTo-EncryptedString',
+        'ConvertFrom-EncryptedString'
     )
     
     # Cmdlets to export from this module
