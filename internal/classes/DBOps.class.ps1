@@ -1105,7 +1105,7 @@ class DBOpsConfig : DBOps {
     }
     DBOpsConfig ([string]$jsonString) {
         if (!$jsonString) {
-            $this.ThrowArgumentException($this, "Input string has not been defined")
+            Stop-PSFFunction -Message "Input string has not been defined" -EnableException $true -ModuleName dbops -FunctionName $this.GetType().Name
         }
         $this.Init()
 
@@ -1116,7 +1116,7 @@ class DBOpsConfig : DBOps {
                 $this.SetValue($property, $jsonConfig.$property)
             }
             else {
-                $this.ThrowArgumentException($this, "$property is not a valid configuration item")
+                Stop-PSFFunction -Message "$property is not a valid configuration item" -EnableException $true -ModuleName dbops -FunctionName $this.GetType().Name
             }
         }
     }
@@ -1140,7 +1140,7 @@ class DBOpsConfig : DBOps {
 
     [void] SetValue ([string]$Property, [object]$Value) {
         if ([DBOpsConfig]::EnumProperties() -notcontains $Property) {
-            $this.ThrowArgumentException($this, "$Property is not a valid configuration item")
+            Stop-PSFFunction -Message "$property is not a valid configuration item" -EnableException $true -ModuleName dbops -FunctionName $this.GetType().Name
         }
         #set proper NullString for String properties
         if ($Value -eq $null -and $Property -in ($this.PsObject.Properties | Where-Object TypeNameOfValue -like 'System.String*').Name) {
