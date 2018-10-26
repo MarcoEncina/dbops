@@ -30,11 +30,11 @@ $fullConfig = "$here\etc\tmp_full_config.json"
 $fullConfigSource = "$here\etc\full_config.json"
 $testPassword = 'TestPassword'
 $securePassword = $testPassword | ConvertTo-SecureString -Force -AsPlainText
-$fromSecureString = $securePassword|  ConvertFrom-SecureString
+$encryptedString = $securePassword | ConvertTo-EncryptedString
 
 Describe "DBOpsConfig class tests" -Tag $commandName, UnitTests, DBOpsConfig {
     BeforeAll {
-        (Get-Content $fullConfigSource -Raw) -replace 'replaceMe', $fromSecureString | Out-File $fullConfig -Force
+        (Get-Content $fullConfigSource -Raw) -replace 'replaceMe', $encryptedString | Out-File $fullConfig -Force
     }
     AfterAll {
         if (Test-Path $fullConfig) { Remove-Item $fullConfig }
@@ -132,7 +132,7 @@ Describe "DBOpsConfig class tests" -Tag $commandName, UnitTests, DBOpsConfig {
             $config.SetValue('Silent', 'string')
             $config.Silent | Should Be $true
             #SecureString property
-            $config.SetValue('Password', $fromSecureString)
+            $config.SetValue('Password', $encryptedString)
             [PSCredential]::new('test', $config.Password).GetNetworkCredential().Password | Should Be $testPassword
             $config.SetValue('Password', $null)
             $config.Password | Should Be $null
@@ -155,9 +155,9 @@ Describe "DBOpsConfig class tests" -Tag $commandName, UnitTests, DBOpsConfig {
             $result.ExecutionTimeout | Should Be 0
             $result.Encrypt | Should Be $null
             $result.Credential.UserName | Should Be 'CredentialUser'
-            [PSCredential]::new('test', ($result.Credential.Password | ConvertTo-SecureString)).GetNetworkCredential().Password | Should Be $testPassword
+            [PSCredential]::new('test', ($result.Credential.Password | ConvertFrom-EncryptedString)).GetNetworkCredential().Password | Should Be $testPassword
             $result.Username | Should Be "TestUser"
-            [PSCredential]::new('test', ($result.Password | ConvertTo-SecureString)).GetNetworkCredential().Password | Should Be "TestPassword"
+            [PSCredential]::new('test', ($result.Password | ConvertFrom-EncryptedString)).GetNetworkCredential().Password | Should Be "TestPassword"
             $result.SchemaVersionTable | Should Be "test.Table"
             $result.Silent | Should Be $true
             $result.Variables | Should Be $null
@@ -292,9 +292,9 @@ Describe "DBOpsConfig class tests" -Tag $commandName, UnitTests, DBOpsConfig {
             $result.ExecutionTimeout | Should Be 0
             $result.Encrypt | Should Be $null
             $result.Credential.UserName | Should Be 'CredentialUser'
-            [PSCredential]::new('test', ($result.Credential.Password | ConvertTo-SecureString)).GetNetworkCredential().Password | Should Be $testPassword
+            [PSCredential]::new('test', ($result.Credential.Password | ConvertFrom-EncryptedString)).GetNetworkCredential().Password | Should Be $testPassword
             $result.Username | Should Be "TestUser"
-            [PSCredential]::new('test', ($result.Password | ConvertTo-SecureString)).GetNetworkCredential().Password | Should Be "TestPassword"
+            [PSCredential]::new('test', ($result.Password | ConvertFrom-EncryptedString)).GetNetworkCredential().Password | Should Be "TestPassword"
             $result.SchemaVersionTable | Should Be "test.Table"
             $result.Silent | Should Be $true
             $result.Variables | Should Be $null

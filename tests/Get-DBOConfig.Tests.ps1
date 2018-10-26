@@ -18,7 +18,7 @@ else {
 $fullConfig = "$here\etc\tmp_full_config.json"
 $fullConfigSource = "$here\etc\full_config.json"
 $testPassword = 'TestPassword'
-$fromSecureString = $testPassword | ConvertTo-SecureString -Force -AsPlainText | ConvertFrom-SecureString
+$encryptedString = $testPassword | ConvertTo-SecureString -Force -AsPlainText | ConvertTo-EncryptedString
 
 $workFolder = Join-Path "$here\etc" "$commandName.Tests.dbops"
 
@@ -31,7 +31,7 @@ Describe "Get-DBOConfig tests" -Tag $commandName, UnitTests {
         if ((Test-Path $workFolder) -and $workFolder -like '*.Tests.dbops') { Remove-Item $workFolder -Recurse }
         $null = New-Item $workFolder -ItemType Directory -Force
         $null = New-DBOPackage -ScriptPath $v1scripts -Name $packageName -Build 1.0 -Force
-        (Get-Content $fullConfigSource -Raw) -replace 'replaceMe', $fromSecureString | Out-File $fullConfig -Force
+        (Get-Content $fullConfigSource -Raw) -replace 'replaceMe', $encryptedString | Out-File $fullConfig -Force
     }
     AfterAll {
         if (Test-Path $fullConfig) { Remove-Item $fullConfig }

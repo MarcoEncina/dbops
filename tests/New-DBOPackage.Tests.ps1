@@ -22,14 +22,14 @@ $scriptFolder = "$here\etc\install-tests\success"
 $fullConfig = "$here\etc\tmp_full_config.json"
 $fullConfigSource = "$here\etc\full_config.json"
 $testPassword = 'TestPassword'
-$fromSecureString = $testPassword | ConvertTo-SecureString -Force -AsPlainText | ConvertFrom-SecureString
+$encryptedString = $testPassword | ConvertTo-SecureString -Force -AsPlainText | ConvertTo-EncryptedString
 
 Describe "New-DBOPackage tests" -Tag $commandName, UnitTests {
     BeforeAll {
         if ((Test-Path $workFolder) -and $workFolder -like '*.Tests.dbops') { Remove-Item $workFolder -Recurse }
         $null = New-Item $workFolder -ItemType Directory -Force
         $null = New-Item $unpackedFolder -ItemType Directory -Force
-        (Get-Content $fullConfigSource -Raw) -replace 'replaceMe', $fromSecureString | Out-File $fullConfig -Force
+        (Get-Content $fullConfigSource -Raw) -replace 'replaceMe', $encryptedString | Out-File $fullConfig -Force
     }
     AfterAll {
         if ((Test-Path $workFolder) -and $workFolder -like '*.Tests.dbops') { Remove-Item $workFolder -Recurse }
@@ -107,9 +107,9 @@ Describe "New-DBOPackage tests" -Tag $commandName, UnitTests {
             $config.ConnectionTimeout | Should Be 40
             $config.Encrypt | Should Be $null
             $config.Credential.UserName | Should Be "CredentialUser"
-            [PSCredential]::new('test', ($config.Credential.Password | ConvertTo-SecureString)).GetNetworkCredential().Password | Should Be "TestPassword"
+            [PSCredential]::new('test', ($config.Credential.Password | ConvertFrom-EncryptedString)).GetNetworkCredential().Password | Should Be "TestPassword"
             $config.Username | Should Be "TestUser"
-            [PSCredential]::new('test', ($config.Password | ConvertTo-SecureString)).GetNetworkCredential().Password | Should Be "TestPassword"
+            [PSCredential]::new('test', ($config.Password | ConvertFrom-EncryptedString)).GetNetworkCredential().Password | Should Be "TestPassword"
             $config.SchemaVersionTable | Should Be "test.Table"
             $config.Silent | Should Be $true
             $config.Variables | Should Be $null

@@ -31,7 +31,7 @@ $packageNamev1 = Join-Path $workFolder "TempDeployment_v1.zip"
 $fullConfig = "$here\etc\tmp_full_config.json"
 $fullConfigSource = "$here\etc\full_config.json"
 $testPassword = 'TestPassword'
-$fromSecureString = $testPassword | ConvertTo-SecureString -Force -AsPlainText | ConvertFrom-SecureString
+$encryptedString = $testPassword | ConvertTo-SecureString -Force -AsPlainText | ConvertTo-EncryptedString
 $newDbName = "_test_$commandName"
 
 Describe "Install-DBOPackage integration tests" -Tag $commandName, IntegrationTests {
@@ -39,7 +39,7 @@ Describe "Install-DBOPackage integration tests" -Tag $commandName, IntegrationTe
         if ((Test-Path $workFolder) -and $workFolder -like '*.Tests.dbops') { Remove-Item $workFolder -Recurse }
         $null = New-Item $workFolder -ItemType Directory -Force
         $null = New-Item $unpackedFolder -ItemType Directory -Force
-        (Get-Content $fullConfigSource -Raw) -replace 'replaceMe', $fromSecureString | Out-File $fullConfig -Force
+        (Get-Content $fullConfigSource -Raw) -replace 'replaceMe', $encryptedString | Out-File $fullConfig -Force
         $dropDatabaseScript = 'IF EXISTS (SELECT * FROM sys.databases WHERE name = ''{0}'') BEGIN ALTER DATABASE [{0}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE [{0}]; END' -f $newDbName
         $null = Invoke-SqlCmd2 -ServerInstance $script:instance1 -Database master -Query $dropDatabaseScript
     }

@@ -1151,7 +1151,7 @@ class DBOpsConfig : DBOps {
                 $this.$Property = $Value
             }
             else {
-                $this.$Property = ConvertTo-SecureString -String $Value -ErrorAction Stop
+                $this.$Property = ConvertFrom-EncryptedString -String $Value
             }
         }
         elseif ($Value -ne $null -and $Property -eq 'Credential') {
@@ -1159,7 +1159,7 @@ class DBOpsConfig : DBOps {
                 $this.$Property = $Value
             }
             else {
-                $this.$Property = [pscredential]::new($Value.UserName, (ConvertTo-SecureString -String $Value.Password -ErrorAction Stop))
+                $this.$Property = [pscredential]::new($Value.UserName, (ConvertFrom-EncryptedString -String $Value.Password))
             }
         }
         else {
@@ -1171,13 +1171,13 @@ class DBOpsConfig : DBOps {
         $outObject = @{}
         foreach ($prop in [DBOpsConfig]::EnumProperties()) {
             if ($this.$prop -is [securestring]) {
-                $outObject += @{ $prop = $this.$prop | ConvertFrom-SecureString }
+                $outObject += @{ $prop = $this.$prop | ConvertTo-EncryptedString }
             }
             elseif ($this.$prop -is [pscredential]) {
                 $outObject += @{
                     $prop = @{
                         UserName = $this.$prop.UserName
-                        Password = $this.$prop.Password | ConvertFrom-SecureString
+                        Password = $this.$prop.Password | ConvertTo-EncryptedString
                     }
                 }
             }
