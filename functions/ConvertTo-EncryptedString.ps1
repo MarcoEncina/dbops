@@ -33,15 +33,16 @@ Function ConvertTo-EncryptedString {
         [Parameter(ValueFromPipeline, Mandatory)]
         [secureString]$SecureString
     )
+    $params = @{ SecureString = $SecureString }
     if (Get-DBODefaultSetting -Name security.usecustomencryptionkey -Value) {
         $key = Get-EncryptionKey
         if (!$key -and $PSCmdlet.ShouldProcess("Generating a new encryption key")) {
             $key = New-EncryptionKey
         }
-        $PSBoundParameters += @{ Key = $key }
+        $params += @{ Key = $key }
     }
     try {
-        ConvertFrom-SecureString @PSBoundParameters
+        ConvertFrom-SecureString @params
     }
     catch {
         Stop-PSFFunction "Failed to encrypt the secure string" -Exception $_ -EnableException $true

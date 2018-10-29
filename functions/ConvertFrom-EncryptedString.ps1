@@ -14,12 +14,6 @@ Function ConvertFrom-EncryptedString {
    
     .PARAMETER String
     String to be decrypted
-    
-    .PARAMETER Confirm
-    Prompts to confirm certain actions
-
-    .PARAMETER WhatIf
-    Shows what would happen if the command would execute, but does not actually perform the command
 
     .EXAMPLE
     # Converts a password provided by user to an encrypted string
@@ -29,20 +23,17 @@ Function ConvertFrom-EncryptedString {
     .NOTES
     
     #>
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding()]
     Param (
         [Parameter(ValueFromPipeline, Mandatory)]
         [String]$String
     )
+    $params = @{ String = $String }
     if (Get-DBODefaultSetting -Name security.usecustomencryptionkey -Value) {
-        $wi = @{}
-        if ($PSCmdlet.ShouldProcess("Getting an encryption key")) {
-            $wi += @{ WhatIf = $true }
-        }
-        $PSBoundParameters += @{ Key = Get-EncryptionKey @wi}
+        $params += @{ Key = Get-EncryptionKey }
     }
     try {
-        ConvertTo-SecureString @PSBoundParameters -ErrorAction Stop
+        ConvertTo-SecureString @params -ErrorAction Stop
     }
     catch {
         Stop-PSFFunction -Message "Failed to decrypt the secure string" -Exception $_ -EnableException $true
