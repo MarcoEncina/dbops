@@ -3,27 +3,43 @@
 build: false
 version: 0.1.{build}
 
+#images 
+
+image: 
+  - Ubuntu
+  - Visual Studio 2017
+
 # Set build info
 environment:
   environment: development
   version: 0.1.$(appveyor_build_number)
 
   matrix:
-  # - scenario: MSSQL
-  #   main_instance: localhost\SQL2017
-  #   services:
-  #     - mssql2017
   - scenario: ALL
-    image: Visual Studio 2017
-    mssql_instance: localhost\SQL2017
-  - scenario: ALL
-    image: Ubuntu
-    mssql_instance: localhost
+
+
+for:
+-
+  matrix:
+    only:
+      - image: Visual Studio 2017
+  environment:
+      mssql_instance: localhost\SQL2017
+  services:
+    - mssql2017
+- matrix:
+    only:
+      - image: Ubuntu
+  environment:
+      mssql_instance: localhost
+  services:
+    - mssql
+
   
 
-#Configure services
-services:
-  - mssql2017
+# #Configure services
+# services:
+#   - mssql2017
   
 # Set alternative clone folder
 #clone_folder: c:\github\dbops
