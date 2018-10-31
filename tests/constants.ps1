@@ -4,5 +4,5 @@ if (Test-Path "$PSScriptRoot\constants.local.ps1") {
     . "$PSScriptRoot\constants.local.ps1"
 }
 else {
-    $script:instance1 = "localhost\SQL2017"
+    $script:instance1 = $env:mssql_instance
 }
