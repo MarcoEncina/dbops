@@ -27,6 +27,17 @@ for:
       mssql_instance: localhost\SQL2017
   services:
     - mssql2017
+  before_test:
+    # run preparation scripts
+    - ps: .\tests\appveyor.prep.ps1
+  test_script:
+    # Test with native PS version
+    - ps: .\tests\appveyor.pester.ps1
+    # Collecting results
+    - ps: .\tests\appveyor.pester.ps1 -Finalize
+  after_test:
+    - ps: .\tests\appveyor.post.ps1
+
 - matrix:
     only:
       - image: Ubuntu
@@ -34,6 +45,16 @@ for:
       mssql_instance: localhost
   services:
     - mssql
+  before_test:
+    # run preparation scripts
+    - ps: ./tests/appveyor.prep.ps1
+  test_script:
+    # Test with native PS version
+    - ps: ./tests/appveyor.pester.ps1
+    # Collecting results
+    - ps: ./tests/appveyor.pester.ps1 -Finalize
+  after_test:
+    - ps: ./tests/appveyor.post.ps1
 
   
 
@@ -44,19 +65,7 @@ for:
 # Set alternative clone folder
 #clone_folder: c:\github\dbops
 
-before_test:
-  # run preparation scripts
-  - ps: .\Tests\appveyor.prep.ps1
- 
-test_script:
-   # Test with native PS version
-  - ps: .\Tests\appveyor.pester.ps1
 
-  # Collecting results
-  - ps: .\Tests\appveyor.pester.ps1 -Finalize
-
-after_test:
-  - ps: .\Tests\appveyor.post.ps1
 
 #on_finish:
 #  - ps:
