@@ -6,7 +6,7 @@ version: 0.1.{build}
 #images 
 
 image: 
-  - Ubuntu
+  - Ubuntu1804
   - Visual Studio 2017
 
 # Set build info
