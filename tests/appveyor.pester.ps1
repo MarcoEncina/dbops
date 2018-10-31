@@ -46,6 +46,8 @@ Set-Location $ModuleBase
 Remove-Module dbops -ErrorAction Ignore
 #imports the module making sure DLL is loaded ok
 Import-Module "$ModuleBase\dbops.psd1"
+$error[0]| select *
+$error[0].Exception|select *
 #import module internal functions
 Get-DBOModuleFileList -Type internal | ForEach-Object { . $_.FullName }
 
