@@ -27,16 +27,6 @@ for:
       mssql_instance: localhost\SQL2017
   services:
     - mssql2017
-  before_test:
-    # run preparation scripts
-    - ps: .\tests\appveyor.prep.ps1
-  test_script:
-    # Test with native PS version
-    - ps: .\tests\appveyor.pester.ps1
-    # Collecting results
-    - ps: .\tests\appveyor.pester.ps1 -Finalize
-  after_test:
-    - ps: .\tests\appveyor.post.ps1
 
 - matrix:
     only:
@@ -45,18 +35,27 @@ for:
       mssql_instance: localhost
   services:
     - mssql
-  before_test:
-    # run preparation scripts
-    - ps: ./tests/appveyor.prep.ps1
-  test_script:
-    # Test with native PS version
-    - ps: ./tests/appveyor.pester.ps1
-    # Collecting results
-    - ps: ./tests/appveyor.pester.ps1 -Finalize
-  after_test:
-    - ps: ./tests/appveyor.post.ps1
+  # before_test:
+  #   # run preparation scripts
+  #   - ps: ./tests/appveyor.prep.ps1
+  # test_script:
+  #   # Test with native PS version
+  #   - ps: ./tests/appveyor.pester.ps1
+  #   # Collecting results
+  #   - ps: ./tests/appveyor.pester.ps1 -Finalize
+  # after_test:
+  #   - ps: ./tests/appveyor.post.ps1
 
-  
+before_test:
+  # run preparation scripts
+  - ps: .\tests\appveyor.prep.ps1
+test_script:
+  # Test with native PS version
+  - ps: .\tests\appveyor.pester.ps1
+  # Collecting results
+  - ps: .\tests\appveyor.pester.ps1 -Finalize
+after_test:
+  - ps: .\tests\appveyor.post.ps1  
 
 # #Configure services
 # services:
